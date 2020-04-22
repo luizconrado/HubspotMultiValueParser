@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SalesforceAccountTree {
@@ -12,8 +13,8 @@ public class SalesforceAccountTree {
     private static final Logger logger = LogManager.getLogger(SalesforceAccountTree.class);
 
     private static long counter = 0;
-    private static Map<String, AccountTree> accountTrees = new ConcurrentHashMap<>();
-    private static Map<String, AccountTree> subAccountTrees = new ConcurrentHashMap<>();
+    private static Map<String, AccountTree> accountTrees = new TreeMap<>(String::compareToIgnoreCase);
+    private static Map<String, AccountTree> subAccountTrees = new TreeMap<>(String::compareToIgnoreCase);
 
     public static void main(String[] args) {
 
@@ -57,27 +58,36 @@ public class SalesforceAccountTree {
             System.out.println();
 
 
-            accountTrees.values().parallelStream().map(SalesforceAccountTree::getDaughters).forEach(accountTrees::putAll);
+//            accountTrees.values().parallelStream().map(SalesforceAccountTree::getDaughters).forEach(accountTrees::putAll);
 
 //            accountTrees.values().parallelStream().forEach(SalesforceAccountTree::getDaughters);
 //            accountTrees.putAll(subAccountTrees);
 
 
-//            for (AccountTree acc : accountTrees.values()) {
-//
-//                Map<String, AccountTree> daughters = getDaughters(acc);
-//
-//
-//                accountTrees.putAll(daughters);
-//
-//            }
+            for (AccountTree acc : accountTrees.values()) {
+
+//                accountTrees.putAll(getDaughters(acc));
+                getDaughters(acc);
+
+            }
+
+            accountTrees.putAll(subAccountTrees);
 
 
             System.out.println();
             System.out.println("---------------------------- DONE ---------------------------------");
             System.out.println();
             System.out.println();
+
+
             System.out.println(accountTrees.values());
+
+
+            System.out.println();
+            System.out.println("---------------------------- Saving Results ---------------------------------");
+            System.out.println();
+            System.out.println();
+
             saveResults(accountTrees);
 
         } catch (SQLException throwables) {
@@ -92,10 +102,11 @@ public class SalesforceAccountTree {
     public static Map<String, AccountTree> getDaughters(AccountTree acc) {
 
 
-        System.out.println("Going to getDaughters => " + acc);
+        System.out.println("Group " + acc.getGroup() + ": 1. Going for getDaughters => " + acc);
 
 
         if (acc.isProcessed()) {
+            System.out.println("*********** Method isProcessed is being used!!!! Why? " + acc + " ******************");
             return subAccountTrees;
         }
 
@@ -129,7 +140,7 @@ public class SalesforceAccountTree {
                 accountTree.setId(value);
 //                accountTree.setProcessed(true);
 
-                System.out.println("Daughter Account => " + accountTree);
+                System.out.println("Group " + acc.getGroup() + ": 2. Daughter Account Found => " + accountTree);
 
                 subAccountTrees.put(accountTree.getId(), accountTree);
 
@@ -138,7 +149,7 @@ public class SalesforceAccountTree {
             }
 
             acc.setProcessed(true);
-            System.out.println("Flagged as Processed => " + acc);
+            System.out.println("Group " + acc.getGroup() + ": 3. Flagged as Processed => " + acc);
 
 
             resultSet2.close();
