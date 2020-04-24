@@ -168,7 +168,7 @@ public class SalesforceAccountTree {
 
     static void saveResults(Map<String, AccountTree> map) {
 
-        String upsertPostgresql = "INSERT INTO public.sfaccount_tree (\"id\", \"parentId\", \"rootId\", \"groupId\", \"processed\") VALUES (?, ?, ?, ?, ?);";
+        String upsertPostgresql = "INSERT INTO public.sfaccount_tree (\"Id\", \"ParentId\", \"RootId\", \"GroupId\", \"Processed\") VALUES (?, ?, ?, ?, ?);";
 
         try (Connection connection3 = HikariPostgreSQL.getConnection();
              Statement statement3 = connection3.createStatement();
@@ -180,23 +180,23 @@ public class SalesforceAccountTree {
 
             statement3.execute("create table if not exists public.sfaccount_tree\n" +
                     "(\n" +
-                    "\tid varchar(18) not null\n" +
+                    "\t\"Id\" varchar(18) not null\n" +
                     "\t\tconstraint sfaccount_tree_pk\n" +
                     "\t\t\tprimary key,\n" +
-                    "\t\"parentId\" varchar(18),\n" +
-                    "\t\"rootId\" varchar(18),\n" +
-                    "\t\"groupId\" bigint,\n" +
-                    "\tprocessed boolean\n" +
+                    "\t\"ParentId\" varchar(18),\n" +
+                    "\t\"RootId\" varchar(18),\n" +
+                    "\t\"GroupId\" bigint,\n" +
+                    "\t\"Processed\" boolean\n" +
                     ");");
 
             statement3.execute("alter table public.sfaccount_tree owner to postgres;");
 
 
             statement3.execute("create index sfaccount_tree_parentid_index\n" +
-                    "\ton public.sfaccount_tree (\"parentId\");");
+                    "\ton public.sfaccount_tree (\"ParentId\");");
 
             statement3.execute("create index sfaccount_tree_rootid_index\n" +
-                    "\ton public.sfaccount_tree (\"rootId\");");
+                    "\ton public.sfaccount_tree (\"RootId\");");
 
 
             statement3.execute("truncate table public.sfaccount_tree;");
